@@ -5,7 +5,7 @@ using namespace std;
 
 int main ()
 {
-cout<<"hey hey hey Yo ho!"<<endl;
+cout<<"jfoieijn efhwie h";
     _getch();
     return 0;
 }

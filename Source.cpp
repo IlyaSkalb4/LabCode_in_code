@@ -4,6 +4,25 @@
 
 using namespace std;
 
+int countstr(string filename)
+{
+	int countr = 0;
+	string str;
+	fstream file;
+	file.open(filename, ios::in);
+	if (!file.is_open())
+	{
+		cout << "Error! File not opened!" << endl;
+	}
+	else
+	{
+		while (getline(file, str))
+		{
+			countr++;
+		}
+	}
+	return countr;
+}
 void newCode(string filename, string& code)
 {
 	string text, buf = "~";
@@ -33,9 +52,9 @@ void newCode(string filename, string& code)
 		cout << "Error! File not opened!" << endl;
 	}
 }
-void changeCode(string filename, string& code)
+void changeCode(string filename, string& code, int numberline)
 {
-	int countr = 1, num = 0, pos = 0;
+	int num = 0, pos = 0, countr = 1;
 	string newstr, text, begin, end, buf;
 	fstream file;
 	file.open(filename, ios::in);
@@ -45,23 +64,22 @@ void changeCode(string filename, string& code)
 	}
 	else
 	{
-		countr = 1;
 		cout << "Enter line number to edit: ";
 		cin >> num;
 		cin.ignore();
-		cout << "Enter the edited line:\n" << num << "\t|";
-		getline(cin, newstr);
-		while (getline(file, text))
+		if (num > numberline || num < 1)
 		{
-			if (num == countr)
+			cout << "This line does not exist!\n";
+		}
+		else
+		{
+			cout << "Enter the edited line:\n" << num << "\t|";
+			getline(cin, newstr);
+			while(getline(file, text))
 			{
-				pos = code.find(text);
-				if (pos == -1)
+				if (num == countr)
 				{
-					break;
-				}
-				else
-				{
+					pos = code.find(text);
 					for (int i = 0; i < code.length(); i++)
 					{
 						if (i < pos)
@@ -75,23 +93,21 @@ void changeCode(string filename, string& code)
 					}
 					buf = begin + newstr + end;
 					code = buf;
-					begin.clear();
-					end.clear();
 				}
+				countr++;
 			}
-			countr++;
+			file.close();
 		}
-		file.close();
-	}
-	file.open(filename, ios::out);
-	if (!file.is_open())
-	{
-		cout << "Error! File not opened!" << endl;
-	}
-	else
-	{
-		file << code;
-		file.close();
+		file.open(filename, ios::out);
+		if (!file.is_open())
+		{
+			cout << "Error! File not opened!" << endl;
+		}
+		else
+		{
+			file << code;
+			file.close();
+		}
 	}
 }
 void startCode(string filename)
@@ -105,7 +121,7 @@ void startCode(string filename)
 
 int main()
 {
-	int num = 0;
+	int num = 0, numberline = 0;
 	string filename = "inside_main.cpp", code;
 	cout << "\t\t\t\t\tMini C++ code editor.\n";
 		do
@@ -124,16 +140,17 @@ int main()
 			case 1:
 			{
 				newCode(filename, code);
+				numberline = countstr(filename);
 				break;
 			}
 			case 2:
 			{
-				changeCode(filename, code);
+				changeCode(filename, code, numberline);
 				break;
 			}
 			case 3:
 			{
-				startCode(filename);
+				startCode(filename); 
 				break;
 			}
 			default:
