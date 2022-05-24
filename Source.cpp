@@ -44,6 +44,21 @@ int countStr(string filename)
 	}
 	return countr;
 }
+fstream fillingFile(string filename, string code)
+{
+	fstream file; 
+	file.open(filename, ios::out);
+	if (!file.is_open())
+	{
+		cout << "Error! File not opened!" << endl;
+	}
+	else
+	{
+		file << code;
+		file.close();
+	}
+	return file;
+}
 string fillingStr(int countr)
 {
 	string text, end = "~", buf;
@@ -78,7 +93,7 @@ void newCode(string filename, string& code)
 		cout << "Error! File not opened!" << endl;
 	}
 }
-void addLine(string filename, string& code, int numberline)
+void deleteLine(string filename, string& code, int numberline)
 {
 	int index = 0, pos = 0, countr = 1;
 	string newstr, text, begin, end, buf;
@@ -90,7 +105,8 @@ void addLine(string filename, string& code, int numberline)
 	}
 	else
 	{
-		cout << "Enter line number to edit: ";
+
+		cout << "Line index to delete: ";
 		cin >> index;
 		cin.ignore();
 		if (index > numberline || index < 1)
@@ -99,40 +115,56 @@ void addLine(string filename, string& code, int numberline)
 		}
 		else
 		{
-			newstr = fillingStr(index);
+			code.clear();
 			while (getline(file, text))
 			{
-				if (index == countr)
+				if (index != countr)
 				{
-					pos = code.find(text);
-					for (int i = 0; i < code.size(); i++)
-					{
-						if (i < pos + text.size())
-						{
-							begin += code[i];
-						}
-						else if (i > pos + text.size())
-						{
-							end += code[i];
-						}
-					}
-					buf = begin + newstr + end;
-					code = buf;
+					code += text + '\n';
 				}
 				countr++;
 			}
 			file.close();
 		}
-		file.open(filename, ios::out);
-		if (!file.is_open())
+		file = fillingFile(filename, code);
+	}
+}
+void addLine(string filename, string& code, int numberline)
+{
+	int index = 0, pos = 0, countr = 1;
+	string newstr, text, begin, end, buf;
+	fstream file;
+	file.open(filename, ios::in);
+	if (!file.is_open())
+	{
+		cout << "Error! File not opened!" << endl;
+	}
+	else
+	{	
+		cout << "Line index to add: ";
+		cin >> index;
+		cin.ignore();
+		if (index > numberline || index < 1)
 		{
-			cout << "Error! File not opened!" << endl;
+			cout << "This line does not exist!\n";
 		}
 		else
 		{
-			file << code;
+			cout << "Enter line: ";
+			newstr = fillingStr(index);
+			code.clear();
+			while (getline(file, text))
+			{
+				if (index == countr)
+				{
+					code += newstr;
+				}
+				code += text + '\n';
+				countr++;
+			}
 			file.close();
 		}
+		file = fillingFile(filename, code);
 	}
 }
 void changeCode(string filename, string& code, int numberline)
@@ -147,7 +179,7 @@ void changeCode(string filename, string& code, int numberline)
 	}
 	else
 	{
-		cout << "Delete line - 1,\nEdit line - any number\nEnter variant: ";
+		cout << "Delete line - 1,\nEdit line - 2\nEnter variant: ";
 		cin >> pos;
 		cout << "Enter line number to edit: ";
 		cin >> num;
@@ -158,47 +190,19 @@ void changeCode(string filename, string& code, int numberline)
 		}
 		else
 		{
-			if (pos == 1)
-			{
-				newstr = "";
-			}
-			else
-			{
-				cout << "Enter the edited line:\n" << num << "\t|";
-				getline(cin, newstr);
-			}
-			while(getline(file, text))
+			cout << "Enter the edited line:\n" << num << "\t|";
+			getline(cin, newstr);
+			code.clear();
+			while (getline(file, text))
 			{
 				if (num == countr)
-				{
-					pos = code.find(text);
-					for (int i = 0; i < code.size(); i++)
-					{
-						if (i < pos)
-						{
-							begin += code[i];
-						}
-						else if (i >= pos + text.size())
-						{
-							end += code[i];
-						}
-					}
-					buf = begin + newstr + end;
-					code = buf;
-				}
+					code += newstr + "\n";
+				else
+					code += text + "\n";
 				countr++;
 			}
 			file.close();
-		}
-		file.open(filename, ios::out);
-		if (!file.is_open())
-		{
-			cout << "Error! File not opened!" << endl;
-		}
-		else
-		{
-			file << code;
-			file.close();
+			file = fillingFile(filename, code);
 		}
 	}
 }
@@ -218,68 +222,77 @@ int main()
 	int num = 0, numberline = 0;
 	string filename = "inside_main.cpp", code = "";
 	cout << "\t\t\t\t\tMini C++ code editor.\n";
-		do
+	do
+	{
+		cout << "\nOutput code - 1,\nAdd new code - 2,\nChange code - 3,\nAdd code - 4,\nDelete line - 5,\nStart - 6,\nExit - 0\n\nEnter variant: ";
+		cin >> num;
+		system("cls");
+		cin.ignore();
+		switch (num)
 		{
-			cout << "\nAdd new code - 1,\nChange code - 2,\nOutput code - 3,\nAdd code - 4,\nStart - 5,\nExit - 0\n\nEnter variant: ";
-			cin >> num;
-			system("cls");
-			cin.ignore();
-			switch (num)
+		case 0:
+		{
+			exit(1);
+			break;
+		}
+		case 1:
+		{
+			if (code == "")
+				cout << "No code.\n";
+			else
+				printCode(filename);
+			break;
+		}
+		case 2:
+		{
+			newCode(filename, code);
+			numberline = countStr(filename);
+			break;
+		}
+		case 3:
+		{
+			if (code == "")
+				cout << "No code.\n";
+			else
 			{
-			case 0:
+				printCode(filename);
+				changeCode(filename, code, numberline);
+			}
+			break;
+		}
+		case 4:
+		{
+			if (code == "")
+				cout << "No code.\n";
+			else
 			{
-				exit(1);
-				break;
+				printCode(filename);
+				addLine(filename, code, numberline);
 			}
-			case 1:
+			break;
+			startCode(filename);
+			break;
+		}
+		case 5:
+		{
+			if (code == "")
+				cout << "No code.\n";
+			else
 			{
-				newCode(filename, code);
-				numberline = countStr(filename);
-				break;
+				printCode(filename);
+				deleteLine(filename, code, numberline);
 			}
-			case 2:
-			{
-				if (code == "")
-					cout << "No code.\n";
-				else
-				{
-					printCode(filename);
-					changeCode(filename, code, numberline);
-				}
-				break;
-			}
-			case 3:
-			{
-				if (code == "")
-					cout << "No code.\n";
-				else
-					printCode(filename);
-				break;
-				startCode(filename); 
-				break;
-			}
-			case 4:
-			{
-				if (code == "")
-					cout << "No code.\n";
-				else
-				{
-					printCode(filename);
-					addLine(filename, code, numberline);
-				}
-				break;
-				startCode(filename);
-				break;
-			}
-			case 5:
-			{
-				startCode(filename);
-				break;
-			}
-			default:
-				cout << "Invalid!\n";
-				break;
-			}
-		} while (true);
-		return 0;
+			break;
+		}
+		case 6:
+		{
+			startCode(filename);
+			break;
+		}
+		default:
+			cout << "Invalid!\n";
+			break;
+		}
+	} while (true);
+	return 0;
 }
